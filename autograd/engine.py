@@ -63,6 +63,16 @@ class Value:
 
         return out
 
+    def log(self):
+        x = math.log(self.data)
+        out = Value(x, (self,))
+
+        def _backprop():
+            self.grad += out.grad / self.data
+        out._backprop = _backprop
+
+        return out
+
     @staticmethod
     def softmax(children):
         exp_x = tuple(child.exp() for child in children)
