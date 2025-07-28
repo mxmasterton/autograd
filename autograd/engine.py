@@ -52,7 +52,23 @@ class Value:
         out._backprop = _backprop
 
         return out
-        
+
+    def exp(self):
+        x = math.exp(self.data)
+        out = Value(x, (self,))
+
+        def _backprop():
+            self.grad += x * out.grad
+        out._backprop = _backprop
+
+        return out
+
+    @staticmethod
+    def softmax(children):
+        exp_x = tuple(child.exp() for child in children)
+        total = sum(exp_x)
+        return tuple(a / total for a in exp_x)
+
     def backprop(self):
         topo = []
         visited = set()
@@ -76,6 +92,12 @@ class Value:
 
     def __sub__(self, other):
         return self + (-other)
+
+    def __truediv__(self, other):
+        return self * other**-1
+
+    def __rtruediv__(self, other):
+        return other * self**-1
 
     def __rsub__(self, other):
         return other + (-self)
